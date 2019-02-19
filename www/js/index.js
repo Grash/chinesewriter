@@ -38,7 +38,7 @@ const app = {
     },
     // Update DOM on a Received Event
     receivedEvent: function(id) {
-      console.log('SOMETHING HAPPENING', startApp)
+      console.log('SOMETHING HAPPENING 2', startApp)
         var parentElement = document.getElementById(id);
         var listeningElement = parentElement.querySelector('.listening');
         var receivedElement = parentElement.querySelector('.received');

@@ -2,43 +2,89 @@ import React from "react";
 import ReactDOM from "react-dom";
 import HanziWriter from "hanzi-writer";
 import ren from "hanzi-writer-data/人";
+import { characterList } from "./characters"
 
 class HelloMessage extends React.Component {
   constructor() {
     super()
     this.resetQuiz = this.resetQuiz.bind(this)
+    this.state = {}
+  }
+
+  loadJSON(character, callback) {   
+
+    var xobj = new XMLHttpRequest();
+        xobj.overrideMimeType("application/json");
+    xobj.open('GET', `res/charData/${character}.json`, true); // Replace 'my_data' with the path to your file
+    xobj.onreadystatechange = function () {
+          if (xobj.readyState == 4 && xobj.status == "200") {
+            // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
+            callback(xobj.responseText);
+          }
+    };
+    xobj.send(null);  
+  }
+
+  loadNewCharacter(index) {
+    const { character, constainerClassName, pinyin, translation } = characterList[index]
+    this.loadJSON(character, (response) => {
+        var charJSON = JSON.parse(response);
+        console.log('RESPONSE', charJSON, constainerClassName)
+        this.setState({
+          character,
+          data: charJSON,
+          pinyin,
+          translation,
+          constainerClassName
+        })
+     });
   }
   componentDidMount() {
-    console.log('DID MOUNT', ren)
-    // var writer = HanziWriter.create('character-target-div', '我', {
-    //   width: 100,
-    //   height: 100,
-    //   padding: 5
-    // });
-    this.writer = HanziWriter.create('character-target-div', '人', {
-      width: 200,
-      height: 200,
-      showCharacter: false,
-      padding: 5,
-      charDataLoader: function() {
-        return ren;
-      }
-    });
+    this.loadNewCharacter(0)
+  }
 
-    this.writer.quiz();
+  componentDidUpdate() {
+    const {character, data, pinyin, translation, constainerClassName = 'empty-writer'} = this.state;
+
+    if(data) {
+      this.writer = HanziWriter.create(constainerClassName, character, {
+        width: 200,
+        height: 200,
+        showCharacter: false,
+        padding: 5,
+        charDataLoader: function() {
+          return data;
+        }
+      });
+
+      this.writer.quiz({
+        onComplete: (summaryData) => {
+          console.log('COMPLETE')
+          document.querySelector(`#${constainerClassName}`).innerHTML = '';
+          this.loadNewCharacter(1)
+        }
+      });
+    }
   }
 
   resetQuiz() {
-    console.log('RESET')
-    this.writer.setCharacter('人')
     this.writer.quiz();
   }
 
   render() {
+    const {character, data, pinyin, translation, constainerClassName = 'empty-writer'} = this.state;
+
     return (
-      <div>
-        <div id="character-target-div"></div>
-        <button onClick={this.resetQuiz}>Reset</button>
+      <div class='character-container'>
+        <p className='pinyin-container'>{pinyin}</p>
+        <p className='translation-container'>{translation}</p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" id={constainerClassName} className='character-svg'>
+          <line x1="0" y1="0" x2="200" y2="200" stroke="#DDD" />
+          <line x1="200" y1="0" x2="0" y2="200" stroke="#DDD" />
+          <line x1="100" y1="0" x2="100" y2="200" stroke="#DDD" />
+          <line x1="0" y1="100" x2="200" y2="100" stroke="#DDD" />
+        </svg>
+        <button onClick={this.resetQuiz} class='reset-button'>Reset</button>
       </div>
     );
   }
@@ -71,7 +117,6 @@ var app = {
     // Bind any events that are required on startup. Common events are:
     // 'load', 'deviceready', 'offline', and 'online'.
     bindEvents: function() {
-      console.log('BIND EVENTS')
         document.addEventListener('deviceready', this.onDeviceReady, false);
     },
     // deviceready Event Handler
@@ -83,7 +128,6 @@ var app = {
     },
     // Update DOM on a Received Event
     receivedEvent: function(id) {
-      console.log('SOMETHING HAPPENING')
         var mountNode = document.getElementById("reactApp");
         ReactDOM.render(<HelloMessage name="Muthu3" />, mountNode);
     }
