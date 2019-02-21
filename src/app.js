@@ -20,7 +20,7 @@ class HelloMessage extends React.Component {
     xobj.open('GET', `res/charData/${character}.json`, true); // Replace 'my_data' with the path to your file
     xobj.onreadystatechange = function () {
           console.log('CHARACTER LOADED', xobj)
-          if (xobj.readyState == 4 && xobj.status == "200") {
+          if (xobj.readyState == 4 && xobj.responseText) {
             // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
             callback(xobj.responseText);
           }
