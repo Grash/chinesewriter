@@ -8,6 +8,8 @@ class HelloMessage extends React.Component {
   constructor() {
     super()
     this.resetQuiz = this.resetQuiz.bind(this)
+    this.loadJSON = this.loadJSON.bind(this)
+    this.loadNewCharacter = this.loadNewCharacter.bind(this)
     this.state = {}
   }
 
@@ -17,6 +19,7 @@ class HelloMessage extends React.Component {
         xobj.overrideMimeType("application/json");
     xobj.open('GET', `res/charData/${character}.json`, true); // Replace 'my_data' with the path to your file
     xobj.onreadystatechange = function () {
+          console.log('CHARACTER LOADED', xobj)
           if (xobj.readyState == 4 && xobj.status == "200") {
             // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
             callback(xobj.responseText);
@@ -27,6 +30,7 @@ class HelloMessage extends React.Component {
 
   loadNewCharacter(index) {
     const { character, constainerClassName, pinyin, translation } = characterList[index]
+    console.log('LOAD CHARACTER', character, constainerClassName, pinyin, translation )
     this.loadJSON(character, (response) => {
         var charJSON = JSON.parse(response);
         console.log('RESPONSE', charJSON, constainerClassName)
@@ -40,6 +44,7 @@ class HelloMessage extends React.Component {
      });
   }
   componentDidMount() {
+    console.log('DID MOUNT')
     this.loadNewCharacter(0)
   }
 
@@ -73,6 +78,7 @@ class HelloMessage extends React.Component {
 
   render() {
     const {character, data, pinyin, translation, constainerClassName = 'empty-writer'} = this.state;
+    console.log('RENDER', character, data, pinyin, translation, constainerClassName)
 
     return (
       <div class='character-container'>
@@ -129,6 +135,7 @@ var app = {
     // Update DOM on a Received Event
     receivedEvent: function(id) {
         var mountNode = document.getElementById("reactApp");
+        console.log('START APP')
         ReactDOM.render(<HelloMessage name="Muthu3" />, mountNode);
     }
 };
