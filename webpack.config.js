@@ -7,6 +7,7 @@ const config = {
         path: path.resolve(__dirname, 'www/js'),
         filename: 'index_react.js'
     },
+    devtool: 'source-map',
     module: {
         rules: [
             {
