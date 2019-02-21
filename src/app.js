@@ -14,7 +14,7 @@ class HelloMessage extends React.Component {
   }
 
   loadJSON(character, callback) {   
-
+    console.log('WTF?!', callback)
     var xobj = new XMLHttpRequest();
         xobj.overrideMimeType("application/json");
     xobj.open('GET', `res/charData/${character}.json`, true); // Replace 'my_data' with the path to your file
@@ -31,7 +31,7 @@ class HelloMessage extends React.Component {
   loadNewCharacter(index) {
     const { character, constainerClassName, pinyin, translation } = characterList[index]
     console.log('LOAD CHARACTER', character, constainerClassName, pinyin, translation )
-    this.loadJSON(character, (response) => {
+    this.loadJSON(character, function(response) {
         var charJSON = JSON.parse(response);
         console.log('RESPONSE', charJSON, constainerClassName)
         this.setState({
@@ -41,7 +41,7 @@ class HelloMessage extends React.Component {
           translation,
           constainerClassName
         })
-     });
+     }.bind(this));
   }
   componentDidMount() {
     console.log('DID MOUNT')
