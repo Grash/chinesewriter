@@ -1,50 +1,32 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import HanziWriter from "hanzi-writer";
-import ren from "hanzi-writer-data/人";
 import { characterList } from "./characters"
 
 class HelloMessage extends React.Component {
   constructor() {
     super()
     this.resetQuiz = this.resetQuiz.bind(this)
-    this.loadJSON = this.loadJSON.bind(this)
     this.loadNewCharacter = this.loadNewCharacter.bind(this)
     this.state = {}
-  }
-
-  loadJSON(character, callback) {   
-    console.log('WTF?!', callback)
-    var xobj = new XMLHttpRequest();
-        xobj.overrideMimeType("application/json");
-    xobj.open('GET', `res/charData/${character}.json`, true); // Replace 'my_data' with the path to your file
-    xobj.onreadystatechange = function () {
-          console.log('CHARACTER LOADED', xobj)
-          if (xobj.readyState == 4 && xobj.responseText) {
-            // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
-            callback(xobj.responseText);
-          }
-    };
-    xobj.send(null);  
+    characterList.forEach(cl => {
+      if(!cl.data) {
+        console.log('MISSING', cl.character)
+      }
+    })
   }
 
   loadNewCharacter(index) {
-    const { character, constainerClassName, pinyin, translation } = characterList[index]
-    console.log('LOAD CHARACTER', character, constainerClassName, pinyin, translation )
-    this.loadJSON(character, function(response) {
-        var charJSON = JSON.parse(response);
-        console.log('RESPONSE', charJSON, constainerClassName)
-        this.setState({
-          character,
-          data: charJSON,
-          pinyin,
-          translation,
-          constainerClassName
-        })
-     }.bind(this));
+    const { character, pinyin, translation, data } = characterList[index]
+    this.setState({
+      character,
+      data,
+      pinyin,
+      translation,
+      charIndex: index
+    })
   }
   componentDidMount() {
-    console.log('DID MOUNT')
     this.loadNewCharacter(0)
   }
 
@@ -52,7 +34,7 @@ class HelloMessage extends React.Component {
     const {character, data, pinyin, translation, constainerClassName = 'empty-writer'} = this.state;
 
     if(data) {
-      this.writer = HanziWriter.create(constainerClassName, character, {
+      this.writer = HanziWriter.create('character-writer-container', character, {
         width: 200,
         height: 200,
         showCharacter: false,
@@ -64,9 +46,9 @@ class HelloMessage extends React.Component {
 
       this.writer.quiz({
         onComplete: (summaryData) => {
-          console.log('COMPLETE')
-          document.querySelector(`#${constainerClassName}`).innerHTML = '';
-          this.loadNewCharacter(1)
+          const gElement = document.querySelector(`#character-writer-container g`);
+          gElement.parentNode.removeChild(gElement)
+          this.loadNewCharacter(this.state.charIndex + 1)
         }
       });
     }
@@ -77,14 +59,13 @@ class HelloMessage extends React.Component {
   }
 
   render() {
-    const {character, data, pinyin, translation, constainerClassName = 'empty-writer'} = this.state;
-    console.log('RENDER', character, data, pinyin, translation, constainerClassName)
+    const {pinyin, translation} = this.state;
 
     return (
       <div class='character-container'>
         <p className='pinyin-container'>{pinyin}</p>
         <p className='translation-container'>{translation}</p>
-        <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" id={constainerClassName} className='character-svg'>
+        <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" id='character-writer-container' className='character-svg'>
           <line x1="0" y1="0" x2="200" y2="200" stroke="#DDD" />
           <line x1="200" y1="0" x2="0" y2="200" stroke="#DDD" />
           <line x1="100" y1="0" x2="100" y2="200" stroke="#DDD" />
