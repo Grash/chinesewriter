@@ -38,6 +38,8 @@ class HelloMessage extends React.Component {
         width: 200,
         height: 200,
         showCharacter: false,
+        showOutline: false,
+        showHintAfterMisses: 1,
         padding: 5,
         charDataLoader: function() {
           return data;
