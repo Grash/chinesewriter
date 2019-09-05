@@ -51,9 +51,12 @@ class HelloMessage extends React.Component {
 
       this.writer.quiz({
         onComplete: (summaryData) => {
-          const gElement = document.querySelector(`#character-writer-container g`);
-          gElement.parentNode.removeChild(gElement)
-          this.loadNewCharacter(this.state.charIndex + 1)
+          
+          setTimeout(() => { 
+            const gElement = document.querySelector(`#character-writer-container g`);
+            gElement.parentNode.removeChild(gElement)
+            this.loadNewCharacter(this.state.charIndex + 1)
+          }, 1000)
         }
       });
     }
@@ -76,7 +79,7 @@ class HelloMessage extends React.Component {
           <line x1="100" y1="0" x2="100" y2="200" stroke="#DDD" />
           <line x1="0" y1="100" x2="200" y2="100" stroke="#DDD" />
         </svg>
-        <button onClick={this.resetQuiz} class='reset-button'>Reset</button>
+        <button onClick={this.resetQuiz} class='reset-button'>Reset 2</button>
       </div>
     );
   }
