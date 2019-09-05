@@ -21,6 +21,7 @@ class HelloMessage extends React.Component {
   loadNewCharacter(index) {
     const char = characterList.splice(index, 1);
     const { character, pinyin, translation, data } = char[0];
+    
     this.setState({
       character,
       data,
