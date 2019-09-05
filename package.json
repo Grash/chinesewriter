@@ -9,6 +9,7 @@
   },
   "husky": {
     "hooks": {
+      "pre-commit": "npm run lint && npm test",
       "pre-push": "npm version minor"
     }
   },
@@ -27,7 +28,7 @@
   "dependencies": {
     "hanzi-writer": "^1.3.0",
     "hanzi-writer-data": "^2.0.1",
-    "lodash": "4.17.11",
+    "lodash": ">=4.17.13",
     "react": "^16.3.2",
     "react-dom": "^16.3.2"
   }
