@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import HanziWriter from "hanzi-writer";
+import _ from "lodash";
 import { characterList } from "./characters"
 
 class HelloMessage extends React.Component {
@@ -8,6 +9,7 @@ class HelloMessage extends React.Component {
     super()
     this.resetQuiz = this.resetQuiz.bind(this)
     this.loadNewCharacter = this.loadNewCharacter.bind(this)
+    this.characterList = _.cloneDeep(characterList)
     this.state = {}
     characterList.forEach(cl => {
       if(!cl.data) {
@@ -17,7 +19,8 @@ class HelloMessage extends React.Component {
   }
 
   loadNewCharacter(index) {
-    const { character, pinyin, translation, data } = characterList[index]
+    const char = characterList.splice(index, 1);
+    const { character, pinyin, translation, data } = char[0];
     this.setState({
       character,
       data,
