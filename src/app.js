@@ -3,6 +3,9 @@ import ReactDOM from "react-dom";
 import HanziWriter from "hanzi-writer";
 import _ from "lodash";
 import { characterList } from "./characters"
+import * as dbService from './db'
+import { loadDailyPracticeCollection } from './daily-practice.service'
+const version = require('../package.json').version
 
 class HelloMessage extends React.Component {
   constructor() {
@@ -10,6 +13,8 @@ class HelloMessage extends React.Component {
     this.resetQuiz = this.resetQuiz.bind(this)
     this.loadNewCharacter = this.loadNewCharacter.bind(this)
     this.characterList = _.cloneDeep(characterList)
+    this.dailyCharacterList = []
+    this.charIndex = 0
     this.state = {}
     characterList.forEach(cl => {
       if(!cl.data) {
@@ -18,23 +23,29 @@ class HelloMessage extends React.Component {
     })
   }
 
-  loadNewCharacter(index) {
-    const char = characterList.splice(index, 1);
-    const { character, pinyin, translation, data } = char[0];
+  loadNewCharacter() {
+    const char = this.dailyCharacterList[this.charIndex];
+    const { character, pinyin, translation, data, skillValue, skillLevel, id } = char;
     this.setState({
       character,
       data,
       pinyin,
       translation,
-      charIndex: index
+      skillValue,
+      skillLevel,
+      id
+    }, () => {
+      this.charIndex = this.charIndex < 9 ? this.charIndex + 1 : 0
     })
   }
-  componentDidMount() {
-    this.loadNewCharacter(0)
+  async componentDidMount() {
+    await dbService.open()
+    this.dailyCharacterList = await loadDailyPracticeCollection()
+    this.loadNewCharacter()
   }
 
   componentDidUpdate() {
-    const {character, data, pinyin, translation, constainerClassName = 'empty-writer'} = this.state;
+    const {character, data, pinyin, translation, constainerClassName = 'empty-writer', id} = this.state;
 
     if(data) {
       this.writer = HanziWriter.create('character-writer-container', character, {
@@ -50,12 +61,15 @@ class HelloMessage extends React.Component {
       });
 
       this.writer.quiz({
-        onComplete: (summaryData) => {
+        onComplete: async (summaryData) => {
+          if(summaryData.totalMistakes < 5) {
+            await dbService.updateSkillValue(id)
+          }
           
           setTimeout(() => { 
             const gElement = document.querySelector(`#character-writer-container g`);
             gElement.parentNode.removeChild(gElement)
-            this.loadNewCharacter(this.state.charIndex + 1)
+            this.loadNewCharacter()
           }, 1000)
         }
       });
@@ -70,16 +84,19 @@ class HelloMessage extends React.Component {
     const {pinyin, translation} = this.state;
 
     return (
-      <div class='character-container'>
-        <p className='pinyin-container'>{pinyin}</p>
-        <p className='translation-container'>{translation}</p>
-        <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" id='character-writer-container' className='character-svg'>
-          <line x1="0" y1="0" x2="200" y2="200" stroke="#DDD" />
-          <line x1="200" y1="0" x2="0" y2="200" stroke="#DDD" />
-          <line x1="100" y1="0" x2="100" y2="200" stroke="#DDD" />
-          <line x1="0" y1="100" x2="200" y2="100" stroke="#DDD" />
-        </svg>
-        <button onClick={this.resetQuiz} class='reset-button'>Reset 2</button>
+      <div>
+        <div class='character-container'>
+          <p className='pinyin-container'>{pinyin}</p>
+          <p className='translation-container'>{translation}</p>
+          <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" id='character-writer-container' className='character-svg'>
+            <line x1="0" y1="0" x2="200" y2="200" stroke="#DDD" />
+            <line x1="200" y1="0" x2="0" y2="200" stroke="#DDD" />
+            <line x1="100" y1="0" x2="100" y2="200" stroke="#DDD" />
+            <line x1="0" y1="100" x2="200" y2="100" stroke="#DDD" />
+          </svg>
+          <button onClick={this.resetQuiz} class='reset-button'>Reset 2</button>
+        </div>
+        <div className='version-tag'>{version}</div>
       </div>
     );
   }
@@ -124,7 +141,6 @@ var app = {
     // Update DOM on a Received Event
     receivedEvent: function(id) {
         var mountNode = document.getElementById("reactApp");
-        console.log('START APP')
         ReactDOM.render(<HelloMessage name="Muthu3" />, mountNode);
     }
 };

@@ -124,3 +124,10 @@ h1 {
     margin-left: 80px;
     margin-top: 10px;
 }
+
+.version-tag {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    padding: 10px;
+}

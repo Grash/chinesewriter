@@ -1,8 +1,9 @@
 const webpack = require('webpack');
 const path = require('path');
+const Dotenv = require('dotenv-webpack');
 
 const config = {
-    entry: './src/app.js',
+    entry: ['@babel/polyfill', './src/app.js'],
     output: {
         path: path.resolve(__dirname, 'www/js'),
         filename: 'index_react.js'
@@ -16,6 +17,9 @@ const config = {
                 use: 'babel-loader'
             }
         ]
-    }
+    },
+    plugins: [
+        new Dotenv()
+    ]
 };
 module.exports = config;
